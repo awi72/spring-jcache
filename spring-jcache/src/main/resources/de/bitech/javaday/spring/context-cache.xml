@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-4.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd">    
+    
+    <beans profile="jdk-proxy">
+	    <cache:annotation-driven mode="proxy"/>
+    	<bean id="mySlowlyService" class="de.bitech.javaday.spring.cache.MySlowlyServiceImpl_JdkProxy"/>
+    	<bean id="cacheManager" class="org.springframework.cache.jcache.JCacheCacheManager">
+    		<constructor-arg ref="jCacheManager"/>
+    	</bean>
+    	<bean id="jCacheManager" factory-bean="jCacheFactoryBean" factory-method="buildJCacheCacheManager"/>
+    	<bean id="jCacheFactoryBean" class="de.bitech.javaday.spring.cache.JCacheManagerFactoryBean"/>
+    </beans>
+    
+    <beans profile="aop-proxy">
+        <cache:annotation-driven mode="aspectj"/>
+        <context:load-time-weaver aspectj-weaving="on"/>
+    	<bean id="mySlowlyService" class="de.bitech.javaday.spring.cache.MySlowlyServiceImpl_AopProxy"/>
+    	<bean id="cacheManager" class="org.springframework.cache.jcache.JCacheCacheManager">
+    		<constructor-arg ref="jCacheManager"/>
+    	</bean>
+    	<bean id="jCacheManager" factory-bean="jCacheFactoryBean" factory-method="buildJCacheCacheManager"/>
+    	<bean id="jCacheFactoryBean" class="de.bitech.javaday.spring.cache.JCacheManagerFactoryBean"/>
+    </beans>
+    
+    <beans profile="cache-aspect">
+    	<import resource="classpath:/de/bitech/javaday/spring/context-cache-manager.xml"/>
+    	<import resource="classpath:/de/bitech/javaday/spring/context-aspect.xml"/>
+    	<bean id="mySlowlyService" class="de.bitech.javaday.spring.cache.MySlowlyServiceImpl_CacheAspect"/>
+    </beans>
+     
+    
+</beans>
